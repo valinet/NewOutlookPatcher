@@ -145,7 +145,7 @@ Proudly engineered by Valentin-Gabriel Radu.",
         {
             this.TopMost = false;
 
-            bool uninstall = !chkDisableFirstMailAd.Checked && !chkDisableOneDriveBanner.Checked && !chkDisableWordIcon.Checked && !chkDisableExcelIcon.Checked && !chkDisablePowerPointIcon.Checked && !chkDisableOneDriveIcon.Checked && !chkDisableMoreAppsIcon.Checked && !chkF12.Checked;
+            bool uninstall = !chkDisableFirstMailAd.Checked && !chkDisableOneDriveBanner.Checked && !chkDisableWordIcon.Checked && !chkDisableExcelIcon.Checked && !chkDisablePowerPointIcon.Checked && !chkDisableToDoIcon.Checked && !chkDisableOneDriveIcon.Checked && !chkDisableMoreAppsIcon.Checked && !chkF12.Checked;
 
             // Create scratch dir
             string tempFolderPath = Path.GetTempPath();
@@ -187,6 +187,8 @@ Proudly engineered by Valentin-Gabriel Radu.",
                             buffer = BytesReplace(buffer, Encoding.Unicode.GetBytes("[id='c5251a9b-a95d-4595-91ee-a39e6eed3db2'], "), Encoding.Unicode.GetBytes("                                             "));
                         if (!chkDisablePowerPointIcon.Checked)
                             buffer = BytesReplace(buffer, Encoding.Unicode.GetBytes("[id='48cb9ead-1c19-4e1f-8ed9-3d60a7e52b18'], "), Encoding.Unicode.GetBytes("                                             "));
+                        if (!chkDisableToDoIcon.Checked)
+                            buffer = BytesReplace(buffer, Encoding.Unicode.GetBytes("[id='59391057-d7d7-49fd-a041-d8e4080f05ec'], "), Encoding.Unicode.GetBytes("                                             "));
                         if (!chkDisableOneDriveIcon.Checked)
                             buffer = BytesReplace(buffer, Encoding.Unicode.GetBytes("[id='39109bd4-9389-4731-b8d6-7cc1a128d0b3'], "), Encoding.Unicode.GetBytes("                                             "));
                         if (!chkDisableMoreAppsIcon.Checked)
@@ -313,13 +315,14 @@ Proudly engineered by Valentin-Gabriel Radu.",
                     chkDisableWordIcon.Checked = chkDisableAll.Checked;
                     chkDisableExcelIcon.Checked = chkDisableAll.Checked;
                     chkDisablePowerPointIcon.Checked = chkDisableAll.Checked;
+                    chkDisableToDoIcon.Checked = chkDisableAll.Checked;
                     chkDisableOneDriveIcon.Checked = chkDisableAll.Checked;
                     chkDisableMoreAppsIcon.Checked = chkDisableAll.Checked;
                     chkF12.Checked = chkDisableAll.Checked;
                 }
                 else
                 {
-                    bool all = chkDisableFirstMailAd.Checked && chkDisableOneDriveBanner.Checked && chkDisableWordIcon.Checked && chkDisableExcelIcon.Checked && chkDisablePowerPointIcon.Checked && chkDisableOneDriveIcon.Checked && chkDisableMoreAppsIcon.Checked && chkF12.Checked;
+                    bool all = chkDisableFirstMailAd.Checked && chkDisableOneDriveBanner.Checked && chkDisableWordIcon.Checked && chkDisableExcelIcon.Checked && chkDisablePowerPointIcon.Checked && chkDisableToDoIcon.Checked && chkDisableOneDriveIcon.Checked && chkDisableMoreAppsIcon.Checked && chkF12.Checked;
                     if (all) chkDisableAll.Checked = true;
                     else chkDisableAll.Checked = false;
                 }

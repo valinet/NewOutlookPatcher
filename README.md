@@ -7,7 +7,7 @@
 <ul>
   <li>Disable ad as first item in e-mails list</li>
   <li>Disable lower left corner OneDrive banner</li>
-  <li>Disable Word, Excel, PowerPoint, OneDrive, More apps icons</li>
+  <li>Disable Word, Excel, PowerPoint, To Do, OneDrive, More apps icons</li>
   <li>Enable F12 Developer Tools</li>
 </ul>
 <div>

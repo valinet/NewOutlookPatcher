@@ -47,6 +47,7 @@
             label4 = new Label();
             chkF12 = new CheckBox();
             label5 = new Label();
+            chkDisableToDoIcon = new CheckBox();
             SuspendLayout();
             // 
             // label1
@@ -153,7 +154,7 @@
             chkDisableOneDriveIcon.AutoSize = true;
             chkDisableOneDriveIcon.Checked = true;
             chkDisableOneDriveIcon.CheckState = CheckState.Checked;
-            chkDisableOneDriveIcon.Location = new Point(213, 271);
+            chkDisableOneDriveIcon.Location = new Point(213, 296);
             chkDisableOneDriveIcon.Name = "chkDisableOneDriveIcon";
             chkDisableOneDriveIcon.Size = new Size(142, 19);
             chkDisableOneDriveIcon.TabIndex = 9;
@@ -166,7 +167,7 @@
             chkDisableMoreAppsIcon.AutoSize = true;
             chkDisableMoreAppsIcon.Checked = true;
             chkDisableMoreAppsIcon.CheckState = CheckState.Checked;
-            chkDisableMoreAppsIcon.Location = new Point(213, 296);
+            chkDisableMoreAppsIcon.Location = new Point(213, 321);
             chkDisableMoreAppsIcon.Name = "chkDisableMoreAppsIcon";
             chkDisableMoreAppsIcon.Size = new Size(149, 19);
             chkDisableMoreAppsIcon.TabIndex = 10;
@@ -236,6 +237,7 @@
             chkF12.TabIndex = 15;
             chkF12.Text = "F12 opens Developer Tools";
             chkF12.UseVisualStyleBackColor = true;
+            chkF12.CheckedChanged += chkDisableAll_CheckedChanged;
             // 
             // label5
             // 
@@ -245,12 +247,26 @@
             label5.TabIndex = 16;
             label5.Text = "Pressing \"Patch\" will close Outlook (olk.exe), apply your settings and restart Outlook (olk.exe) for you.";
             // 
+            // chkDisableToDoIcon
+            // 
+            chkDisableToDoIcon.AutoSize = true;
+            chkDisableToDoIcon.Checked = true;
+            chkDisableToDoIcon.CheckState = CheckState.Checked;
+            chkDisableToDoIcon.Location = new Point(213, 271);
+            chkDisableToDoIcon.Name = "chkDisableToDoIcon";
+            chkDisableToDoIcon.Size = new Size(123, 19);
+            chkDisableToDoIcon.TabIndex = 17;
+            chkDisableToDoIcon.Text = "Disable To Do icon";
+            chkDisableToDoIcon.UseVisualStyleBackColor = true;
+            chkDisableToDoIcon.CheckedChanged += chkDisableAll_CheckedChanged;
+            // 
             // Form1
             // 
             AcceptButton = btnApplyRestart;
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(410, 469);
+            Controls.Add(chkDisableToDoIcon);
             Controls.Add(label5);
             Controls.Add(chkF12);
             Controls.Add(label4);
@@ -303,5 +319,6 @@
         private Label label4;
         private CheckBox chkF12;
         private Label label5;
+        private CheckBox chkDisableToDoIcon;
     }
 }
