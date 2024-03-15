@@ -280,14 +280,14 @@ Proudly engineered by Valentin-Gabriel Radu.",
                 if (processes.Length > 0 && processes[0].MainModule != null)
                 {
                     processes[0].CloseMainWindow();
-                    processes[0].WaitForExit();
-
-                    ProcessStartInfo psi = new ProcessStartInfo();
-                    psi.FileName = loader2Path;
-                    psi.UseShellExecute = true;
-                    psi.Verb = "runas";
-                    System.Diagnostics.Process.Start(psi).WaitForExit();
+                    processes[0].WaitForExit(5000);
+                    processes[0].Kill();
                 }
+                ProcessStartInfo psi = new ProcessStartInfo();
+                psi.FileName = loader2Path;
+                psi.UseShellExecute = true;
+                psi.Verb = "runas";
+                System.Diagnostics.Process.Start(psi).WaitForExit();
             }
             catch (Exception ex)
             {
