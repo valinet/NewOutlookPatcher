@@ -84,7 +84,7 @@
             chkDisableFirstMailAd.Name = "chkDisableFirstMailAd";
             chkDisableFirstMailAd.Size = new Size(386, 53);
             chkDisableFirstMailAd.TabIndex = 3;
-            chkDisableFirstMailAd.Text = "Disable ad as first item in mail list\r\nThe first item in the mailbox is always an ad, unless you pay for Microsoft 365. Use this to only show real e-mails in the list.";
+            chkDisableFirstMailAd.Text = "Disable ad as first item in e-mails list\r\nThe first item in the mailbox is always an ad, unless you pay for Microsoft 365. Use this to only show real e-mails in the list.";
             chkDisableFirstMailAd.UseVisualStyleBackColor = true;
             chkDisableFirstMailAd.CheckedChanged += chkDisableAll_CheckedChanged;
             // 
