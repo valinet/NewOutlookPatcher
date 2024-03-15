@@ -1,6 +1,11 @@
 <h1>NewOutlookPatcher</h1>
 <a href="https://discord.gg/gsPcfqHTD2"><img src="https://discordapp.com/api/guilds/1155912047897350204/widget.png?style=shield" alt="Join on Discord"></a>
 <p>Disable ads and product placement in new Outlook for Windows app.</p>
+<p>Tested on:</p>
+<ul>
+  <li>Windows 10 Version 21H2 (OS Build 19044.4046)</li>
+  <li>Windows 11 Version 23H2 (OS Build 22621.3296)</li>
+</ul>
 <h2>Donate</h2>
 <p>If you find this project essential to your daily life, please consider donating to support the development through the <a href="https://github.com/valinet/NewOutlookPatcher?sponsor">Sponsor</a> button at the top of this page, so that we can continue to keep supporting newer Windows builds.</p>
 <h2>Features</h2>
@@ -30,21 +35,21 @@
   <li><a href="https://github.com/valinet/NewOutlookPatcher/issues/1">Patcher is x64-only at the moment.</a></li>
   <li><a href="https://github.com/valinet/NewOutlookPatcher/issues/2">Patcher does not read the current configuration at startup, but instead displays suggested default settings.</a></li>
   <li>Patcher cannot run successfully when virtualization-based security is enabled. Open Windows Security - Device security - Core isolation details, disable Memory integrity and reboot. After reboot, execute patcher with desired settings, confirm they work in the Outlook app, and then you can enable back Memory integrity (the custom drivers used for placing files in Outlook's program folder are incompatible with the virtualization-based security feature).</li>
-  <li>Patcher cannot run successfully on newer Windows versions (for example, Windows 11 22H2) where the kernel driver that is used is blacklisted. A workaround is to reboot into advanced recovery options (Settings - Windows Update - Advanced options - Recovery - Advanced startup - Restart now), and from the list that appears, choose Troubleshoot - Advanced options - Startup Settings - Restart. Finally, press "7" to choose "Disable driver signature enforcement" for the next boot. Windows will start with DSE off - you can run patcher with desired options. When done, reboot the system.</li>
 </ul>
 <h2>How it works?</h2>
 <ul>
   <li>Everything is packed together in a tiny .NET 8-based executable. Required resources are extracted to a temporary folder at runtime.</li>
   <li>Patching Outlook (<code>olk.exe</code>) is done using the now classic <code>dxgi.dll</code> method, exploiting the DLL search order. The project contains a very clean C++ implementation of this technique. This works because the process is not protected, thus being able to load unsigned code.</li>
   <li>The actual patching is done by hooking WebView2 methods, in order to execute scripts that alter the CSS once the main interface loads.</li>
-  <li>The main problem for this entire project was, believe it or not, copying the injector to Outlook's program folder. Being in the infamous <code>WindowsApps</code> folder which is thoroughly protected, after a ton of hours researching a user space solution, I resorted to exploiting CVE-2018-19320 to load an own compiled driver which does the copying in kernel space, thus bypassing any ACLs and other user space protections Windows imposes on that folder. CVE-2018-19320 is a technique where a known signed driver (in this case made by GIGABYTE) that allows for arbitrary kernel memory access via an IOCTL is loaded in the running kernel, and then the exposed IOCTL is used to temporarly disable DSE (driver signature enforcement) in order to further load our custom unsigned driver. DSE has to be enabled back as quickly as possible, as PatchGuard detects the change eventually and bug checks the machine if left like that.</li>
+  <li>The main problem for this entire project was, believe it or not, copying the injector to Outlook's program folder. Being in the infamous <code>WindowsApps</code> folder which is thoroughly protected, after a ton of hours researching a user space solution, I resorted to exploiting CVE-2018-19320 to load an own compiled driver which does the copying in kernel space, thus bypassing any ACLs and other user space protections Windows imposes on that folder. CVE-2018-19320 is a technique where a known signed driver that allows for arbitrary kernel memory access via an IOCTL is loaded in the running kernel, and then the exposed IOCTL is used to temporarly disable DSE (driver signature enforcement) in order to further load our custom unsigned driver. DSE has to be enabled back as quickly as possible, as PatchGuard detects the change eventually and bug checks the machine if left like that.</li>
 </ul>
 <h2>Solution structure</h2>
-<p>The Visual Studio solution is divided 4 projects:</p>
+<p>The Visual Studio solution is divided 5 projects:</p>
 <ul>
   <li>gui: Contains user interface and unpacker logic, C# .NET 8.</li>
   <li>worker: Module that gets loaded by Outlook which injects custom JavaScript and CSS in the user interface.</li>
   <li>installer: Kernel mode driver which copies the worker to Outlook's program folder.</li>
-  <li>loader: Loads the installer in the kernel.</li>
+  <li>loader2: Disables DSE and starts loader.exe (based on <a href="https://www.codeproject.com/Articles/5348168/Disable-Driver-Signature-Enforcement-with-DSE-Patc">this</a>).</li>
+  <li>loader: Loads custom kernel module (based on <a href="https://github.com/zer0condition/GDRVLoader">this</a>).</li>
 </ul>
 <p>Successful compilation is only possible for x64 at the moment. Files packed in the final executable are always grabbed from the <code>Release</code> folder, beware when building in <code>Debug</code>.</p>

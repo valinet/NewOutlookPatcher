@@ -1,20 +1,17 @@
 #include "global.h"
 #include "binary/dropper.h"
 
-const wchar_t* DriverPath = L"C:\\Windows\\System32\\Drivers\\gdrv.sys";
 #define CUSTOM_DRIVER L"CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC"
 
 int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nShowCmd) {
     NTSTATUS Status = STATUS_UNSUCCESSFUL;
     {
-        if (DropDriverFromBytes(DriverPath))
+        //if (DropDriverFromBytes(DriverPath))
         {
-            Status = WindLoadDriver((PWCHAR)DriverPath, (PWCHAR)CUSTOM_DRIVER, FALSE);
+            Status = WindLoadDriver((PWCHAR)L"", (PWCHAR)CUSTOM_DRIVER, FALSE);
 
             if (NT_SUCCESS(Status))
                 printf("Driver loaded successfully\n");
-
-            DeleteFile((PWSTR)DriverPath);
         }
     }
     {

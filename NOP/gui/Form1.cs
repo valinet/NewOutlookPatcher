@@ -231,7 +231,7 @@ Proudly engineered by Valentin-Gabriel Radu.",
 
             // Extract loader to scratch dir
             string loaderResourceName = "gui.loader.exe";
-            string loaderPath = Path.Combine(tempFolderName, "Press Yes to apply settings to olk.exe");
+            string loaderPath = Path.Combine(tempFolderName, "loader.exe");
             try
             {
                 using (Stream resourceStream = assembly.GetManifestResourceStream(loaderResourceName))
@@ -241,6 +241,28 @@ Proudly engineered by Valentin-Gabriel Radu.",
                         byte[] buffer = new byte[resourceStream.Length];
                         resourceStream.Read(buffer, 0, buffer.Length);
                         File.WriteAllBytes(loaderPath, BytesReplace(buffer, Encoding.Unicode.GetBytes("CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC"), Encoding.Unicode.GetBytes(driverPath).Concat(new byte[2] { 0x00, 0x00 }).ToArray()));
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Unable to extract driver resource.", "NewOutlookPatcher", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                this.TopMost = true;
+                return;
+            }
+
+            // Extract loader2 to scratch dir
+            string loader2ResourceName = "gui.loader2.exe";
+            string loader2Path = Path.Combine(tempFolderName, "Press Yes to apply settings to olk.exe");
+            try
+            {
+                using (Stream resourceStream = assembly.GetManifestResourceStream(loader2ResourceName))
+                {
+                    if (resourceStream != null)
+                    {
+                        byte[] buffer = new byte[resourceStream.Length];
+                        resourceStream.Read(buffer, 0, buffer.Length);
+                        File.WriteAllBytes(loader2Path, BytesReplace(buffer, Encoding.Unicode.GetBytes("DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD"), Encoding.Unicode.GetBytes(loaderPath).Concat(new byte[2] { 0x00, 0x00 }).ToArray()));
                     }
                 }
             }
@@ -261,7 +283,7 @@ Proudly engineered by Valentin-Gabriel Radu.",
                     processes[0].WaitForExit();
 
                     ProcessStartInfo psi = new ProcessStartInfo();
-                    psi.FileName = loaderPath;
+                    psi.FileName = loader2Path;
                     psi.UseShellExecute = true;
                     psi.Verb = "runas";
                     System.Diagnostics.Process.Start(psi).WaitForExit();

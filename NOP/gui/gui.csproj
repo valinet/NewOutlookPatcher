@@ -8,12 +8,12 @@
     <ImplicitUsings>enable</ImplicitUsings>
 	<ForceDesignerDPIUnaware>true</ForceDesignerDPIUnaware>
 	<Title>NewOutlookPatcher</Title>
-	<AssemblyVersion>2024.03.15.02</AssemblyVersion>
-	<FileVersion>2024.03.15.02</FileVersion>
+	<AssemblyVersion>2024.03.15.03</AssemblyVersion>
+	<FileVersion>2024.03.15.03</FileVersion>
 	<PackageProjectUrl>https://github.com/valinet/NewOutlookPatcher</PackageProjectUrl>
 	<Copyright>Copyright 2024 VALINET Solutions. All rights reserved.</Copyright>
 	<Description>Disable ads and product placement in the new Outlook for Windows app.</Description>
-	<Version>2024.03.15.02</Version>
+	<Version>2024.03.15.03</Version>
 	<PublishSingleFile>true</PublishSingleFile>
 	<PackageId>NewOutlookPatcher</PackageId>
 	<Authors>NewOutlookPatcher</Authors>
@@ -31,6 +31,7 @@
   <ItemGroup>
     <EmbeddedResource Include="$(SolutionDir)\x64\Release\dxgi.dll" />
 	<EmbeddedResource Include="$(SolutionDir)\x64\Release\loader.exe" />
+	<EmbeddedResource Include="$(SolutionDir)\x64\Release\loader2.exe" />
 	<EmbeddedResource Include="$(SolutionDir)\x64\Release\installer.sys" />
   </ItemGroup>
 
