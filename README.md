@@ -24,11 +24,13 @@
 <p>New Outlook for Windows is installed in <code>Program Files - WindowsApps</code> which is write-protected for regular users, thus administrative access is required to place the patcher in that folder.</p>
 <h2>Uninstalling</h2>
 <p>Run <code>NewOutlookPatcher</code>. Uncheck all options. Press <code>Patch</code>. Done.</p>
-<h2>Limitations</h2>
+<h2>Known issues</h2>
 <ul>
   <li>Patcher does not start? Install <a href="https://dotnet.microsoft.com/en-us/download/dotnet/thank-you/runtime-desktop-8.0.3-windows-x64-installer">.NET Desktop Runtime 8</a>.</li>
   <li><a href="https://github.com/valinet/NewOutlookPatcher/issues/1">Patcher is x64-only at the moment.</a></li>
   <li><a href="https://github.com/valinet/NewOutlookPatcher/issues/2">Patcher does not read the current configuration at startup, but instead displays suggested default settings.</a></li>
+  <li>Patcher cannot run successfully when virtualization-based security is enabled. Open Windows Security - Device security - Core isolation details, disable Memory integrity and reboot. After reboot, execute patcher with desired settings, confirm they work in the Outlook app, and then you can enable back Memory integrity (the custom drivers used for placing files in Outlook's program folder are incompatible with the virtualization-based security feature).</li>
+  <li>Patcher cannot run successfully on newer Windows versions (for example, Windows 11 22H2) where the kernel driver that is used is blacklisted. A workaround is to reboot into advanced recovery options (Settings - Windows Update - Advanced options - Recovery - Advanced startup - Restart now), and from the list that appears, choose Troubleshoot - Advanced options - Startup Settings - Restart. Finally, press "7" to choose "Disable driver signature enforcement" for the next boot. Windows will start with DSE off - you can run patcher with desired options. When done, reboot the system.</li>
 </ul>
 <h2>How it works?</h2>
 <ul>
