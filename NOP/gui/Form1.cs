@@ -42,6 +42,7 @@ namespace gui
             return principal.IsInRole(WindowsBuiltInRole.Administrator);
         }
 
+        // https://stackoverflow.com/questions/10702514/most-efficient-way-to-replace-one-sequence-of-the-bytes-with-some-other-sequence
         private static byte[] BytesReplace(byte[] input, byte[] pattern, byte[] replacement, bool keepSize = true)
         {
             if (pattern.Length == 0)
