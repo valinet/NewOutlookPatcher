@@ -11,7 +11,7 @@
   <li>Enable F12 Developer Tools</li>
 </ul>
 <div>
-  <img src="https://github.com/valinet/NewOutlookPatcher/assets/6503598/0a6eb1eb-a9cc-4d3f-9632-01849963ae40" alt="Product image">
+  <img src="https://github.com/valinet/NewOutlookPatcher/assets/6503598/1d70519d-38e2-4663-bee6-46ce3e7dbc90" alt="Product image">
 </div>
 <h2>How to?</h2>
 <ol type="1">
