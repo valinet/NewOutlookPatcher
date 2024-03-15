@@ -1,5 +1,5 @@
 <h1>NewOutlookPatcher</h1>
-[![Join on Discord](https://discordapp.com/api/guilds/1155912047897350204/widget.png?style=shield)](https://discord.gg/gsPcfqHTD2)
+<a href="https://discord.gg/gsPcfqHTD2"><img src="https://discordapp.com/api/guilds/1155912047897350204/widget.png?style=shield" alt="Join on Discord"></a>
 <p>Disable ads and product placement in new Outlook for Windows app.</p>
 <h2>Donate</h2>
 <p>If you find this project essential to your daily life, please consider donating to support the development through the <a href="https://github.com/valinet/NewOutlookPatcher?sponsor">Sponsor</a> button at the top of this page, so that we can continue to keep supporting newer Windows builds.</p>
@@ -11,7 +11,7 @@
   <li>Enable F12 Developer Tools</li>
 </ul>
 <div>
-  <img src="https://github.com/valinet/NewOutlookPatcher/assets/6503598/0ffe01ba-d8c9-4a42-abca-13ef11cebbf3" alt="ok">
+  <img src="https://github.com/valinet/NewOutlookPatcher/assets/6503598/0ffe01ba-d8c9-4a42-abca-13ef11cebbf3" alt="Product image">
 </div>
 <h2>How to?</h2>
 <ol type="1">
