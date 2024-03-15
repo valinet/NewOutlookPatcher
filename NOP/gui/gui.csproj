@@ -1,0 +1,37 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <UseWindowsForms>true</UseWindowsForms>
+    <ImplicitUsings>enable</ImplicitUsings>
+	<ForceDesignerDPIUnaware>true</ForceDesignerDPIUnaware>
+	<Title>NewOutlookPatcher</Title>
+	<AssemblyVersion>2024.03.15.01</AssemblyVersion>
+	<FileVersion>2024.03.15.01</FileVersion>
+	<PackageProjectUrl>https://github.com/valinet/NewOutlookPatcher</PackageProjectUrl>
+	<Copyright>Copyright 2024 VALINET Solutions. All rights reserved.</Copyright>
+	<Description>Disable ads and product placement in the new Outlook for Windows app.</Description>
+	<Version>2024.03.15.01</Version>
+	<PublishSingleFile>true</PublishSingleFile>
+	<PackageId>NewOutlookPatcher</PackageId>
+	<Authors>NewOutlookPatcher</Authors>
+	<Company>VALINET Solutions SRL</Company>
+	<Product>NewOutlookPatcher</Product>
+	<IncludeSymbols>True</IncludeSymbols>
+	<TargetName>NewOutlookPatcher</TargetName>
+	<AssemblyName>NewOutlookPatcher</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="dxgi.dll" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="$(SolutionDir)\x64\Release\dxgi.dll" />
+	<EmbeddedResource Include="$(SolutionDir)\x64\Release\loader.exe" />
+	<EmbeddedResource Include="$(SolutionDir)\x64\Release\installer.sys" />
+  </ItemGroup>
+
+</Project>
