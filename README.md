@@ -7,7 +7,7 @@
   <li>Windows 11 Version 23H2 (OS Build 22621.3296)</li>
 </ul>
 <h2>Donate</h2>
-<p>If you find this project essential to your daily life, please consider donating to support the development through the <a href="https://github.com/valinet/NewOutlookPatcher?sponsor">Sponsor</a> button at the top of this page, so that we can continue to keep supporting newer Windows builds.</p>
+<p><a href="https://github.com/valinet/NewOutlookPatcher?sponsor">PayPal donations</a></p>
 <h2>Features</h2>
 <ul>
   <li>Disable ad as first item in e-mails list</li>
@@ -44,7 +44,7 @@
   <li>The main problem for this entire project was, believe it or not, copying the injector to Outlook's program folder. Being in the infamous <code>WindowsApps</code> folder which is thoroughly protected, after a ton of hours researching a user space solution, I resorted to exploiting CVE-2018-19320 to load an own compiled driver which does the copying in kernel space, thus bypassing any ACLs and other user space protections Windows imposes on that folder. CVE-2018-19320 is a technique where a known signed driver that allows for arbitrary kernel memory access via an IOCTL is loaded in the running kernel, and then the exposed IOCTL is used to temporarly disable DSE (driver signature enforcement) in order to further load our custom unsigned driver. DSE has to be enabled back as quickly as possible, as PatchGuard detects the change eventually and bug checks the machine if left like that.</li>
 </ul>
 <h2>Solution structure</h2>
-<p>The Visual Studio solution is divided 5 projects:</p>
+<p>The Visual Studio solution is divided in 5 projects:</p>
 <ul>
   <li>gui: Contains user interface and unpacker logic, C# .NET 8.</li>
   <li>worker: Module that gets loaded by Outlook which injects custom JavaScript and CSS in the user interface.</li>
