@@ -77,39 +77,76 @@ inline bool VnPatchIAT(HMODULE hMod, const char* libName, const char* funcName, 
     ::FreeLibrary(module);
     return false;
 }
-#pragma endregion
 
-#pragma region "Exports"
-/*
-extern "C" {
-    static HRESULT(*__CreateDXGIFactory1)(void*, void**);
-    __declspec(dllexport) HRESULT _CreateDXGIFactory1(void* p1, void** p2)
+inline BOOL VnPatchDelayIAT(HMODULE hMod, const char* libName, const char* funcName, uintptr_t hookAddr) {
+    // Increment module reference count to prevent other threads from unloading it while we're working with it
+    HMODULE lib;
+    if (!GetModuleHandleExW(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS, (LPCWSTR)hMod, &lib)) return FALSE;
+
+    PIMAGE_DOS_HEADER dos = (PIMAGE_DOS_HEADER)lib;
+    PIMAGE_NT_HEADERS nt = (PIMAGE_NT_HEADERS)((uintptr_t)lib + dos->e_lfanew);
+    PIMAGE_DELAYLOAD_DESCRIPTOR dload = (PIMAGE_DELAYLOAD_DESCRIPTOR)((uintptr_t)lib +
+        nt->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_DELAY_IMPORT].VirtualAddress);
+    while (dload->DllNameRVA)
     {
-        MessageBoxW(nullptr, L"Hello, world !", L"", 0);
-        return __CreateDXGIFactory1(p1, p2);
+        char* dll = (char*)((uintptr_t)lib + dload->DllNameRVA);
+        if (!_stricmp(dll, libName)) {
+#ifdef _LIBVALINET_DEBUG_HOOKING_IATPATCH
+            printf("[PatchDelayIAT] Found %s in IAT.\n", libName);
+#endif
+
+            PIMAGE_THUNK_DATA firstthunk = (PIMAGE_THUNK_DATA)((uintptr_t)lib + dload->ImportNameTableRVA);
+            PIMAGE_THUNK_DATA functhunk = (PIMAGE_THUNK_DATA)((uintptr_t)lib + dload->ImportAddressTableRVA);
+            while (firstthunk->u1.AddressOfData)
+            {
+                if (firstthunk->u1.Ordinal & IMAGE_ORDINAL_FLAG)
+                {
+                    if (!(*((WORD*)&(funcName)+1)) && IMAGE_ORDINAL32(firstthunk->u1.Ordinal) == (DWORD_PTR)funcName)
+                    {
+                        DWORD oldProtect;
+                        if (VirtualProtect(&functhunk->u1.Function, sizeof(uintptr_t), PAGE_EXECUTE_READWRITE, &oldProtect))
+                        {
+                            functhunk->u1.Function = (uintptr_t)hookAddr;
+                            VirtualProtect(&functhunk->u1.Function, sizeof(uintptr_t), oldProtect, &oldProtect);
+#ifdef _LIBVALINET_DEBUG_HOOKING_IATPATCH
+                            printf("[PatchDelayIAT] Patched 0x%x in %s to 0x%p.\n", funcName, libName, hookAddr);
+#endif
+                            FreeLibrary(lib);
+                            return TRUE;
+                        }
+                        FreeLibrary(lib);
+                        return FALSE;
+                    }
+                }
+                else
+                {
+                    PIMAGE_IMPORT_BY_NAME byName = (PIMAGE_IMPORT_BY_NAME)((uintptr_t)lib + firstthunk->u1.AddressOfData);
+                    if ((*((WORD*)&(funcName)+1)) && !_stricmp((char*)byName->Name, funcName))
+                    {
+                        DWORD oldProtect;
+                        if (VirtualProtect(&functhunk->u1.Function, sizeof(uintptr_t), PAGE_EXECUTE_READWRITE, &oldProtect))
+                        {
+                            functhunk->u1.Function = (uintptr_t)hookAddr;
+                            VirtualProtect(&functhunk->u1.Function, sizeof(uintptr_t), oldProtect, &oldProtect);
+#ifdef _LIBVALINET_DEBUG_HOOKING_IATPATCH
+                            printf("[PatchDelayIAT] Patched %s in %s to 0x%p.\n", funcName, libName, hookAddr);
+#endif
+                            FreeLibrary(lib);
+                            return TRUE;
+                        }
+                        FreeLibrary(lib);
+                        return FALSE;
+                    }
+                }
+                functhunk++;
+                firstthunk++;
+            }
+        }
+        dload++;
     }
+    FreeLibrary(lib);
+    return FALSE;
 }
-#pragma comment(linker, "/export:CreateDXGIFactory1=_CreateDXGIFactory1,@11")
-*/
-#pragma comment(linker, "/export:ApplyCompatResolutionQuirking=C:\\Windows\\System32\\dxgi.dll.ApplyCompatResolutionQuirking,@1")
-#pragma comment(linker, "/export:CompatString=C:\\Windows\\System32\\dxgi.dll.CompatString,@2")
-#pragma comment(linker, "/export:CompatValue=C:\\Windows\\System32\\dxgi.dll.CompatValue,@3")
-#pragma comment(linker, "/export:CreateDXGIFactory=C:\\Windows\\System32\\dxgi.dll.CreateDXGIFactory,@10")
-#pragma comment(linker, "/export:CreateDXGIFactory1=C:\\Windows\\System32\\dxgi.dll.CreateDXGIFactory1,@11")
-#pragma comment(linker, "/export:CreateDXGIFactory2=C:\\Windows\\System32\\dxgi.dll.CreateDXGIFactory2,@12")
-#pragma comment(linker, "/export:DXGID3D10CreateDevice=C:\\Windows\\System32\\dxgi.dll.DXGID3D10CreateDevice,@13")
-#pragma comment(linker, "/export:DXGID3D10CreateLayeredDevice=C:\\Windows\\System32\\dxgi.dll.DXGID3D10CreateLayeredDevice,@14")
-#pragma comment(linker, "/export:DXGID3D10GetLayeredDeviceSize=C:\\Windows\\System32\\dxgi.dll.DXGID3D10GetLayeredDeviceSize,@15")
-#pragma comment(linker, "/export:DXGID3D10RegisterLayers=C:\\Windows\\System32\\dxgi.dll.DXGID3D10RegisterLayers,@16")
-#pragma comment(linker, "/export:DXGIDeclareAdapterRemovalSupport=C:\\Windows\\System32\\dxgi.dll.DXGIDeclareAdapterRemovalSupport,@17")
-#pragma comment(linker, "/export:DXGIDumpJournal=C:\\Windows\\System32\\dxgi.dll.DXGIDumpJournal,@4")
-#pragma comment(linker, "/export:DXGIGetDebugInterface1=C:\\Windows\\System32\\dxgi.dll.DXGIGetDebugInterface1,@18")
-#pragma comment(linker, "/export:DXGIReportAdapterConfiguration=C:\\Windows\\System32\\dxgi.dll.DXGIReportAdapterConfiguration,@19")
-#pragma comment(linker, "/export:PIXBeginCapture=C:\\Windows\\System32\\dxgi.dll.PIXBeginCapture,@5")
-#pragma comment(linker, "/export:PIXEndCapture=C:\\Windows\\System32\\dxgi.dll.PIXEndCapture,@6")
-#pragma comment(linker, "/export:PIXGetCaptureState=C:\\Windows\\System32\\dxgi.dll.PIXGetCaptureState,@7")
-#pragma comment(linker, "/export:SetAppCompatStringPointer=C:\\Windows\\System32\\dxgi.dll.SetAppCompatStringPointer,@8")
-#pragma comment(linker, "/export:UpdateHMDEmulationStatus=C:\\Windows\\System32\\dxgi.dll.UpdateHMDEmulationStatus,@9")
 #pragma endregion
 
 #pragma region "Hooks"
@@ -251,20 +288,82 @@ STDAPI _CreateCoreWebView2EnvironmentWithOptions(PCWSTR browserExecutableFolder,
 }
 #pragma endregion
 
+#pragma region "AppVerifier infrastructure"
+#define DLL_PROCESS_VERIFIER 4
+
+typedef struct _RTL_VERIFIER_THUNK_DESCRIPTOR {
+    PCHAR ThunkName;
+    PVOID ThunkOldAddress;
+    PVOID ThunkNewAddress;
+} RTL_VERIFIER_THUNK_DESCRIPTOR, * PRTL_VERIFIER_THUNK_DESCRIPTOR;
+
+typedef struct _RTL_VERIFIER_DLL_DESCRIPTOR {
+    PWCHAR DllName;
+    ULONG DllFlags;
+    PVOID DllAddress;
+    PRTL_VERIFIER_THUNK_DESCRIPTOR DllThunks;
+} RTL_VERIFIER_DLL_DESCRIPTOR, * PRTL_VERIFIER_DLL_DESCRIPTOR;
+
+typedef void (NTAPI* RTL_VERIFIER_DLL_LOAD_CALLBACK) (
+    PWSTR DllName,
+    PVOID DllBase,
+    SIZE_T DllSize,
+    PVOID Reserved);
+typedef void (NTAPI* RTL_VERIFIER_DLL_UNLOAD_CALLBACK) (
+    PWSTR DllName,
+    PVOID DllBase,
+    SIZE_T DllSize,
+    PVOID Reserved);
+typedef void (NTAPI* RTL_VERIFIER_NTDLLHEAPFREE_CALLBACK) (
+    PVOID AllocationBase,
+    SIZE_T AllocationSize);
+
+typedef struct _RTL_VERIFIER_PROVIDER_DESCRIPTOR {
+    ULONG Length;
+    PRTL_VERIFIER_DLL_DESCRIPTOR ProviderDlls;
+    RTL_VERIFIER_DLL_LOAD_CALLBACK ProviderDllLoadCallback;
+    RTL_VERIFIER_DLL_UNLOAD_CALLBACK ProviderDllUnloadCallback;
+
+    PWSTR VerifierImage;
+    ULONG VerifierFlags;
+    ULONG VerifierDebug;
+
+    PVOID RtlpGetStackTraceAddress;
+    PVOID RtlpDebugPageHeapCreate;
+    PVOID RtlpDebugPageHeapDestroy;
+
+    RTL_VERIFIER_NTDLLHEAPFREE_CALLBACK ProviderNtdllHeapFreeCallback;
+} RTL_VERIFIER_PROVIDER_DESCRIPTOR;
+
+RTL_VERIFIER_DLL_DESCRIPTOR noHooks{};
+RTL_VERIFIER_PROVIDER_DESCRIPTOR desc = {
+    sizeof(desc),
+    &noHooks,
+    [](auto, auto, auto, auto) {},
+    [](auto, auto, auto, auto) {},
+    nullptr, 0, 0,
+    nullptr, nullptr, nullptr,
+    [](auto, auto) {},
+};
+#pragma endregion
+
 BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved) {
     UNREFERENCED_PARAMETER(lpvReserved);
 
     switch (fdwReason) {
     case DLL_PROCESS_ATTACH:
         ::DisableThreadLibraryCalls(hinstDLL);
-        //__CreateDXGIFactory1 = (HRESULT(*)(void*, void**))::GetProcAddress(::GetModuleHandleW(L"C:\\Windows\\System32\\dxgi.dll"), "CreateDXGIFactory1");
-        ::VnPatchIAT(::GetModuleHandleW(nullptr), "WebView2Loader.dll", "CreateCoreWebView2EnvironmentWithOptions", reinterpret_cast<uintptr_t>(_CreateCoreWebView2EnvironmentWithOptions));
         break;
     case DLL_THREAD_ATTACH:
         break;
     case DLL_THREAD_DETACH:
         break;
     case DLL_PROCESS_DETACH:
+        break;
+    case DLL_PROCESS_VERIFIER:
+        *(PVOID*)lpvReserved = &desc;
+        ::VnPatchIAT(::GetModuleHandleW(nullptr), "WebView2Loader.dll", "CreateCoreWebView2EnvironmentWithOptions", reinterpret_cast<uintptr_t>(_CreateCoreWebView2EnvironmentWithOptions));
+        ::VnPatchDelayIAT(::GetModuleHandleW(nullptr), "WebView2Loader.dll", "CreateCoreWebView2EnvironmentWithOptions", reinterpret_cast<uintptr_t>(_CreateCoreWebView2EnvironmentWithOptions));
         break;
     }
     return true;

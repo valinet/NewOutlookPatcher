@@ -1,4 +1,5 @@
 using Microsoft.VisualBasic.ApplicationServices;
+using Microsoft.Win32;
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
@@ -6,6 +7,7 @@ using System.Runtime.InteropServices;
 using System.Security.Principal;
 using System.Text;
 using System.Windows.Forms.VisualStyles;
+using System.Xml.Linq;
 
 namespace gui
 {
@@ -43,7 +45,7 @@ namespace gui
         }
 
         // https://stackoverflow.com/questions/10702514/most-efficient-way-to-replace-one-sequence-of-the-bytes-with-some-other-sequence
-        private static byte[] BytesReplace(byte[] input, byte[] pattern, byte[] replacement, bool keepSize = true)
+        private static byte[] BytesReplace(byte[] input, byte[] pattern, byte[] replacement, ref int numMatches, bool keepSize = true)
         {
             if (pattern.Length == 0)
             {
@@ -68,6 +70,7 @@ namespace gui
 
                 if (foundMatch)
                 {
+                    numMatches++;
                     result.AddRange(replacement);
                     i += keepSize ? (replacement.Length - 1) : (pattern.Length - 1);
                 }
@@ -85,14 +88,92 @@ namespace gui
             return result.ToArray();
         }
 
+        public static bool IsPatcherInstalled()
+        {
+            bool isFileDropped = File.Exists(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System), "NewOutlookPatcher.dll"));
+            bool isVerifierEnabled = false;
+            bool isSetAsVerifierDll = false;
+
+            RegistryKey localMachine = RegistryKey.OpenBaseKey(Microsoft.Win32.RegistryHive.LocalMachine, RegistryView.Registry64);
+            var reg = localMachine.OpenSubKey("SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Image File Execution Options\\olk.exe", false);
+            if (reg != null)
+            {
+                var obj1 = reg.GetValue("GlobalFlag");
+                if (obj1 != null)
+                {
+                    isVerifierEnabled = ((((int)obj1) & 0x100) == 0x100);
+                }
+                var obj2 = reg.GetValue("VerifierDlls");
+                if (obj2 != null)
+                {
+                    string verifierDlls = (string)obj2;
+                    isSetAsVerifierDll = verifierDlls.Contains("NewOutlookPatcher.dll");
+                }
+            }
+            return isFileDropped && isVerifierEnabled && isSetAsVerifierDll;
+        }
+
+        public void FormatUI(bool patcherInstalled)
+        {
+            if (patcherInstalled)
+            {
+                btnApplyRestart.Text = "&Apply";
+                btnUninstall.Enabled = true;
+                label5.Text = label5.Text.Replace("Install", "Apply");
+            }
+            else
+            {
+                btnApplyRestart.Text = "&Install";
+                btnUninstall.Enabled = false;
+                label5.Text = label5.Text.Replace("Apply", "Install");
+            }
+        }
+
         public Form1()
         {
             InitializeComponent();
             if (!IsAdministrator()) AddShieldToButton(btnApplyRestart);
+            if (!IsAdministrator()) AddShieldToButton(btnUninstall);
         }
 
         private void Form1_Load(object sender, EventArgs e)
         {
+            // Update UI to reflect install status
+            FormatUI(IsPatcherInstalled());
+
+            // Load current settings
+            if (IsPatcherInstalled())
+            {
+                byte[] buffer = File.ReadAllBytes(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System), "NewOutlookPatcher.dll"));
+                int numMatches = 0;
+                buffer = BytesReplace(buffer, Encoding.Unicode.GetBytes("#OwaContainer, "), Encoding.Unicode.GetBytes("               "), ref numMatches);
+                chkDisableFirstMailAd.Checked = (numMatches > 0);
+                numMatches = 0;
+                buffer = BytesReplace(buffer, Encoding.Unicode.GetBytes(".syTot, "), Encoding.Unicode.GetBytes("        "), ref numMatches);
+                chkDisableOneDriveBanner.Checked = (numMatches > 0);
+                numMatches = 0;
+                buffer = BytesReplace(buffer, Encoding.Unicode.GetBytes("[id='34318026-c018-414b-abb3-3e32dfb9cc4c'], "), Encoding.Unicode.GetBytes("                                             "), ref numMatches);
+                chkDisableWordIcon.Checked = (numMatches > 0);
+                numMatches = 0;
+                buffer = BytesReplace(buffer, Encoding.Unicode.GetBytes("[id='c5251a9b-a95d-4595-91ee-a39e6eed3db2'], "), Encoding.Unicode.GetBytes("                                             "), ref numMatches);
+                chkDisableExcelIcon.Checked = (numMatches > 0);
+                numMatches = 0;
+                buffer = BytesReplace(buffer, Encoding.Unicode.GetBytes("[id='48cb9ead-1c19-4e1f-8ed9-3d60a7e52b18'], "), Encoding.Unicode.GetBytes("                                             "), ref numMatches);
+                chkDisablePowerPointIcon.Checked = (numMatches > 0);
+                numMatches = 0;
+                buffer = BytesReplace(buffer, Encoding.Unicode.GetBytes("[id='59391057-d7d7-49fd-a041-d8e4080f05ec'], "), Encoding.Unicode.GetBytes("                                             "), ref numMatches);
+                chkDisableToDoIcon.Checked = (numMatches > 0);
+                numMatches = 0;
+                buffer = BytesReplace(buffer, Encoding.Unicode.GetBytes("[id='39109bd4-9389-4731-b8d6-7cc1a128d0b3'], "), Encoding.Unicode.GetBytes("                                             "), ref numMatches);
+                chkDisableOneDriveIcon.Checked = (numMatches > 0);
+                numMatches = 0;
+                buffer = BytesReplace(buffer, Encoding.Unicode.GetBytes(".___1fkhojs.f22iagw.f122n59.f1vx9l62.f1c21dwh.fqerorx.f1i5mqs4, "), Encoding.Unicode.GetBytes("                                                                "), ref numMatches);
+                chkDisableMoreAppsIcon.Checked = (numMatches > 0);
+                numMatches = 0;
+                buffer = BytesReplace(buffer, Encoding.Unicode.GetBytes("y_1A36CD25-E20F-4D0D-B1E6-3CC4307E1488"), Encoding.Unicode.GetBytes("n"), ref numMatches);
+                chkF12.Checked = (numMatches > 0);
+            }
+
             Process[] processes = Process.GetProcessesByName("olk");
             if (processes.Length > 0 && processes[0].MainModule != null)
             {
@@ -145,7 +226,11 @@ Proudly engineered by Valentin-Gabriel Radu.",
         {
             this.TopMost = false;
 
-            bool uninstall = !chkDisableFirstMailAd.Checked && !chkDisableOneDriveBanner.Checked && !chkDisableWordIcon.Checked && !chkDisableExcelIcon.Checked && !chkDisablePowerPointIcon.Checked && !chkDisableToDoIcon.Checked && !chkDisableOneDriveIcon.Checked && !chkDisableMoreAppsIcon.Checked && !chkF12.Checked;
+            bool uninstall = ((!chkDisableFirstMailAd.Checked && !chkDisableOneDriveBanner.Checked && !chkDisableWordIcon.Checked && !chkDisableExcelIcon.Checked && !chkDisablePowerPointIcon.Checked && !chkDisableToDoIcon.Checked && !chkDisableOneDriveIcon.Checked && !chkDisableMoreAppsIcon.Checked && !chkF12.Checked) || (sender == btnUninstall));
+
+            string exeName = "Press Yes to apply new settings to olk.exe";
+            if (!IsPatcherInstalled()) exeName = "Press Yes to install patcher in olk.exe";
+            if (uninstall) exeName = "Press Yes to uninstall patcher from olk.exe";
 
             // Create scratch dir
             string tempFolderPath = Path.GetTempPath();
@@ -161,110 +246,58 @@ Proudly engineered by Valentin-Gabriel Radu.",
                 return;
             }
 
-            Assembly assembly = Assembly.GetExecutingAssembly();
-
             // Extract worker to scratch dir
-            string workerResourceName = "gui.dxgi.dll";
-            string workerPath = Path.Combine(tempFolderName, "dxgi.dll");
-            try
-            {
-                using (Stream resourceStream = assembly.GetManifestResourceStream(workerResourceName))
+            if (!uninstall) {
+                Assembly assembly = Assembly.GetExecutingAssembly();
+                string workerResourceName = "gui.dxgi.dll";
+                string workerPath = Path.Combine(tempFolderName, "NewOutlookPatcher.dll");
+                try
                 {
-                    if (resourceStream != null)
+                    using (Stream resourceStream = assembly.GetManifestResourceStream(workerResourceName))
                     {
-                        byte[] buffer = new byte[resourceStream.Length];
-                        resourceStream.Read(buffer, 0, buffer.Length);
-                        if (!chkDisableFirstMailAd.Checked)
+                        if (resourceStream != null)
                         {
-                            buffer = BytesReplace(buffer, Encoding.Unicode.GetBytes("#OwaContainer, "), Encoding.Unicode.GetBytes("               "));
-                            buffer = BytesReplace(buffer, Encoding.Unicode.GetBytes(".kk1xx._Bfyd.iIsOF.IjQyD, "), Encoding.Unicode.GetBytes("                          "));
+                            int numMatches = 0;
+                            byte[] buffer = new byte[resourceStream.Length];
+                            resourceStream.Read(buffer, 0, buffer.Length);
+                            if (!chkDisableFirstMailAd.Checked)
+                            {
+                                buffer = BytesReplace(buffer, Encoding.Unicode.GetBytes("#OwaContainer, "), Encoding.Unicode.GetBytes("               "), ref numMatches);
+                                buffer = BytesReplace(buffer, Encoding.Unicode.GetBytes(".kk1xx._Bfyd.iIsOF.IjQyD, "), Encoding.Unicode.GetBytes("                          "), ref numMatches);
+                            }
+                            if (!chkDisableOneDriveBanner.Checked)
+                                buffer = BytesReplace(buffer, Encoding.Unicode.GetBytes(".syTot, "), Encoding.Unicode.GetBytes("        "), ref numMatches);
+                            if (!chkDisableWordIcon.Checked)
+                                buffer = BytesReplace(buffer, Encoding.Unicode.GetBytes("[id='34318026-c018-414b-abb3-3e32dfb9cc4c'], "), Encoding.Unicode.GetBytes("                                             "), ref numMatches);
+                            if (!chkDisableExcelIcon.Checked)
+                                buffer = BytesReplace(buffer, Encoding.Unicode.GetBytes("[id='c5251a9b-a95d-4595-91ee-a39e6eed3db2'], "), Encoding.Unicode.GetBytes("                                             "), ref numMatches);
+                            if (!chkDisablePowerPointIcon.Checked)
+                                buffer = BytesReplace(buffer, Encoding.Unicode.GetBytes("[id='48cb9ead-1c19-4e1f-8ed9-3d60a7e52b18'], "), Encoding.Unicode.GetBytes("                                             "), ref numMatches);
+                            if (!chkDisableToDoIcon.Checked)
+                                buffer = BytesReplace(buffer, Encoding.Unicode.GetBytes("[id='59391057-d7d7-49fd-a041-d8e4080f05ec'], "), Encoding.Unicode.GetBytes("                                             "), ref numMatches);
+                            if (!chkDisableOneDriveIcon.Checked)
+                                buffer = BytesReplace(buffer, Encoding.Unicode.GetBytes("[id='39109bd4-9389-4731-b8d6-7cc1a128d0b3'], "), Encoding.Unicode.GetBytes("                                             "), ref numMatches);
+                            if (!chkDisableMoreAppsIcon.Checked)
+                                buffer = BytesReplace(buffer, Encoding.Unicode.GetBytes(".___1fkhojs.f22iagw.f122n59.f1vx9l62.f1c21dwh.fqerorx.f1i5mqs4, "), Encoding.Unicode.GetBytes("                                                                "), ref numMatches);
+                            if (!chkF12.Checked)
+                                buffer = BytesReplace(buffer, Encoding.Unicode.GetBytes("y_1A36CD25-E20F-4D0D-B1E6-3CC4307E1488"), Encoding.Unicode.GetBytes("n"), ref numMatches);
+
+                            File.WriteAllBytes(workerPath, buffer);
                         }
-                        if (!chkDisableOneDriveBanner.Checked)
-                            buffer = BytesReplace(buffer, Encoding.Unicode.GetBytes(".syTot, "), Encoding.Unicode.GetBytes("        "));
-                        if (!chkDisableWordIcon.Checked)
-                            buffer = BytesReplace(buffer, Encoding.Unicode.GetBytes("[id='34318026-c018-414b-abb3-3e32dfb9cc4c'], "), Encoding.Unicode.GetBytes("                                             "));
-                        if (!chkDisableExcelIcon.Checked)
-                            buffer = BytesReplace(buffer, Encoding.Unicode.GetBytes("[id='c5251a9b-a95d-4595-91ee-a39e6eed3db2'], "), Encoding.Unicode.GetBytes("                                             "));
-                        if (!chkDisablePowerPointIcon.Checked)
-                            buffer = BytesReplace(buffer, Encoding.Unicode.GetBytes("[id='48cb9ead-1c19-4e1f-8ed9-3d60a7e52b18'], "), Encoding.Unicode.GetBytes("                                             "));
-                        if (!chkDisableToDoIcon.Checked)
-                            buffer = BytesReplace(buffer, Encoding.Unicode.GetBytes("[id='59391057-d7d7-49fd-a041-d8e4080f05ec'], "), Encoding.Unicode.GetBytes("                                             "));
-                        if (!chkDisableOneDriveIcon.Checked)
-                            buffer = BytesReplace(buffer, Encoding.Unicode.GetBytes("[id='39109bd4-9389-4731-b8d6-7cc1a128d0b3'], "), Encoding.Unicode.GetBytes("                                             "));
-                        if (!chkDisableMoreAppsIcon.Checked)
-                            buffer = BytesReplace(buffer, Encoding.Unicode.GetBytes(".___1fkhojs.f22iagw.f122n59.f1vx9l62.f1c21dwh.fqerorx.f1i5mqs4, "), Encoding.Unicode.GetBytes("                                                                "));
-                        if (!chkF12.Checked)
-                            buffer = BytesReplace(buffer, Encoding.Unicode.GetBytes("y_1A36CD25-E20F-4D0D-B1E6-3CC4307E1488"), Encoding.Unicode.GetBytes("n"));
-
-                        File.WriteAllBytes(workerPath, buffer);
                     }
                 }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Unable to extract worker resource.", "NewOutlookPatcher", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                this.TopMost = true;
-                return;
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Unable to extract worker resource.", "NewOutlookPatcher", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    this.TopMost = true;
+                    return;
+                }
             }
 
-            // Extract driver to scratch dir
-            string driverResourceName = "gui.installer.sys";
-            string driverPath = Path.Combine(tempFolderName, "installer.sys");
+            // Customize UAC prompt
             try
             {
-                using (Stream resourceStream = assembly.GetManifestResourceStream(driverResourceName))
-                {
-                    if (resourceStream != null)
-                    {
-                        byte[] buffer = new byte[resourceStream.Length];
-                        resourceStream.Read(buffer, 0, buffer.Length);
-                        File.WriteAllBytes(driverPath, BytesReplace(BytesReplace(buffer, Encoding.Unicode.GetBytes("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"), Encoding.Unicode.GetBytes(uninstall ? "ZwDeleteFile" : workerPath).Concat(new byte[2] { 0x00, 0x00 }).ToArray()), Encoding.Unicode.GetBytes("BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB"), Encoding.Unicode.GetBytes(Path.Combine(txtPath.Text, "dxgi.dll")).Concat(new byte[2] { 0x00, 0x00 }).ToArray()));
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Unable to extract driver resource.", "NewOutlookPatcher", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                this.TopMost = true;
-                return;
-            }
-
-            // Extract loader to scratch dir
-            string loaderResourceName = "gui.loader.exe";
-            string loaderPath = Path.Combine(tempFolderName, "loader.exe");
-            try
-            {
-                using (Stream resourceStream = assembly.GetManifestResourceStream(loaderResourceName))
-                {
-                    if (resourceStream != null)
-                    {
-                        byte[] buffer = new byte[resourceStream.Length];
-                        resourceStream.Read(buffer, 0, buffer.Length);
-                        File.WriteAllBytes(loaderPath, BytesReplace(buffer, Encoding.Unicode.GetBytes("CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC"), Encoding.Unicode.GetBytes(driverPath).Concat(new byte[2] { 0x00, 0x00 }).ToArray()));
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Unable to extract driver resource.", "NewOutlookPatcher", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                this.TopMost = true;
-                return;
-            }
-
-            // Extract loader2 to scratch dir
-            string loader2ResourceName = "gui.loader2.exe";
-            string loader2Path = Path.Combine(tempFolderName, "Press Yes to apply settings to olk.exe");
-            try
-            {
-                using (Stream resourceStream = assembly.GetManifestResourceStream(loader2ResourceName))
-                {
-                    if (resourceStream != null)
-                    {
-                        byte[] buffer = new byte[resourceStream.Length];
-                        resourceStream.Read(buffer, 0, buffer.Length);
-                        File.WriteAllBytes(loader2Path, BytesReplace(buffer, Encoding.Unicode.GetBytes("DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD"), Encoding.Unicode.GetBytes(loaderPath).Concat(new byte[2] { 0x00, 0x00 }).ToArray()));
-                    }
-                }
+                File.Copy(Application.ExecutablePath, Path.Combine(tempFolderName, exeName), true);
             }
             catch (Exception ex)
             {
@@ -284,7 +317,8 @@ Proudly engineered by Valentin-Gabriel Radu.",
                     processes[0].Kill();
                 }
                 ProcessStartInfo psi = new ProcessStartInfo();
-                psi.FileName = loader2Path;
+                psi.FileName = Path.Combine(tempFolderName, exeName);
+                psi.Arguments = uninstall ? "--uninstall" : ("--install \"" + tempFolderName + "\"");
                 psi.UseShellExecute = true;
                 psi.Verb = "runas";
                 System.Diagnostics.Process.Start(psi).WaitForExit();
@@ -320,6 +354,9 @@ Proudly engineered by Valentin-Gabriel Radu.",
             {
 
             }
+
+            // Update UI to reflect install status
+            FormatUI(IsPatcherInstalled());
 
             this.TopMost = true;
         }

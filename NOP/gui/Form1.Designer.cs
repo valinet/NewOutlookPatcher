@@ -48,6 +48,7 @@
             chkF12 = new CheckBox();
             label5 = new Label();
             chkDisableToDoIcon = new CheckBox();
+            btnUninstall = new Button();
             SuspendLayout();
             // 
             // label1
@@ -183,7 +184,7 @@
             btnApplyRestart.Name = "btnApplyRestart";
             btnApplyRestart.Size = new Size(98, 29);
             btnApplyRestart.TabIndex = 11;
-            btnApplyRestart.Text = "&Patch";
+            btnApplyRestart.Text = "&Install";
             btnApplyRestart.UseVisualStyleBackColor = true;
             btnApplyRestart.Click += btnApplyRestart_Click;
             // 
@@ -245,7 +246,7 @@
             label5.Name = "label5";
             label5.Size = new Size(391, 33);
             label5.TabIndex = 16;
-            label5.Text = "Pressing \"Patch\" will close Outlook (olk.exe), apply your settings and restart Outlook (olk.exe) for you.";
+            label5.Text = "Pressing \"Install\" will close Outlook (olk.exe), apply your settings and restart Outlook (olk.exe) for you.";
             // 
             // chkDisableToDoIcon
             // 
@@ -260,12 +261,25 @@
             chkDisableToDoIcon.UseVisualStyleBackColor = true;
             chkDisableToDoIcon.CheckedChanged += chkDisableAll_CheckedChanged;
             // 
+            // btnUninstall
+            // 
+            btnUninstall.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+            btnUninstall.Enabled = false;
+            btnUninstall.Location = new Point(196, 428);
+            btnUninstall.Name = "btnUninstall";
+            btnUninstall.Size = new Size(98, 29);
+            btnUninstall.TabIndex = 18;
+            btnUninstall.Text = "&Uninstall";
+            btnUninstall.UseVisualStyleBackColor = true;
+            btnUninstall.Click += btnApplyRestart_Click;
+            // 
             // Form1
             // 
             AcceptButton = btnApplyRestart;
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(410, 469);
+            Controls.Add(btnUninstall);
             Controls.Add(chkDisableToDoIcon);
             Controls.Add(label5);
             Controls.Add(chkF12);
@@ -320,5 +334,6 @@
         private CheckBox chkF12;
         private Label label5;
         private CheckBox chkDisableToDoIcon;
+        private Button btnUninstall;
     }
 }
