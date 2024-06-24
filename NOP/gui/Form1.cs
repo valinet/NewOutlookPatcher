@@ -146,7 +146,7 @@ namespace gui
             {
                 byte[] buffer = File.ReadAllBytes(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System), "NewOutlookPatcher.dll"));
                 int numMatches = 0;
-                buffer = BytesReplace(buffer, Encoding.Unicode.GetBytes("#OwaContainer, "), Encoding.Unicode.GetBytes("               "), ref numMatches);
+                buffer = BytesReplace(buffer, Encoding.Unicode.GetBytes("#OwaContainer, #OwaContainerSlot1, "), Encoding.Unicode.GetBytes("                                   "), ref numMatches);
                 chkDisableFirstMailAd.Checked = (numMatches > 0);
                 numMatches = 0;
                 buffer = BytesReplace(buffer, Encoding.Unicode.GetBytes(".syTot, "), Encoding.Unicode.GetBytes("        "), ref numMatches);
@@ -262,8 +262,8 @@ Proudly engineered by Valentin-Gabriel Radu.",
                             resourceStream.Read(buffer, 0, buffer.Length);
                             if (!chkDisableFirstMailAd.Checked)
                             {
-                                buffer = BytesReplace(buffer, Encoding.Unicode.GetBytes("#OwaContainer, "), Encoding.Unicode.GetBytes("               "), ref numMatches);
-                                buffer = BytesReplace(buffer, Encoding.Unicode.GetBytes(".kk1xx._Bfyd.iIsOF.IjQyD, "), Encoding.Unicode.GetBytes("                          "), ref numMatches);
+                                buffer = BytesReplace(buffer, Encoding.Unicode.GetBytes("#OwaContainer, #OwaContainerSlot1, "), Encoding.Unicode.GetBytes("                                   "), ref numMatches);
+                                buffer = BytesReplace(buffer, Encoding.Unicode.GetBytes(".kk1xx._Bfyd.iIsOF.IjQyD, .kk1xx.lHRXq.iIsOF.IjQyD, "), Encoding.Unicode.GetBytes("                                                    "), ref numMatches);
                             }
                             if (!chkDisableOneDriveBanner.Checked)
                                 buffer = BytesReplace(buffer, Encoding.Unicode.GetBytes(".syTot, "), Encoding.Unicode.GetBytes("        "), ref numMatches);

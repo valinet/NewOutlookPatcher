@@ -9,12 +9,12 @@
     <ImplicitUsings>enable</ImplicitUsings>
 	<ForceDesignerDPIUnaware>true</ForceDesignerDPIUnaware>
 	<Title>NewOutlookPatcher</Title>
-	<AssemblyVersion>2024.06.24.01</AssemblyVersion>
-	<FileVersion>2024.06.24.01</FileVersion>
+	<AssemblyVersion>2024.06.24.03</AssemblyVersion>
+	<FileVersion>2024.06.24.03</FileVersion>
 	<PackageProjectUrl>https://github.com/valinet/NewOutlookPatcher</PackageProjectUrl>
 	<Copyright>Copyright 2024 VALINET Solutions. All rights reserved.</Copyright>
 	<Description>Disable ads and product placement in the new Outlook for Windows app.</Description>
-	<Version>2024.06.24.01</Version>
+	<Version>2024.06.24.03</Version>
 	<PublishSingleFile>true</PublishSingleFile>
 	<PackageId>NewOutlookPatcher</PackageId>
 	<Authors>NewOutlookPatcher</Authors>

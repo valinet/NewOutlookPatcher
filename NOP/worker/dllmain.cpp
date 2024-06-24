@@ -169,8 +169,8 @@ HRESULT STDMETHODCALLTYPE _ICoreWebView2CreateCoreWebView2ControllerCompletedHan
             auto script = L"\
 const styleElement = document.createElement('style');\n\
 const cssClass = \"\
-#OwaContainer, "                                                     /* First "email" ad when online */ L"\
-.kk1xx._Bfyd.iIsOF.IjQyD, "                                          /* First "email" ad when offline */ L"\
+#OwaContainer, #OwaContainerSlot1, "                                 /* First "email" ad when online */ L"\
+.kk1xx._Bfyd.iIsOF.IjQyD, .kk1xx.lHRXq.iIsOF.IjQyD, "                /* First "email" ad when offline */ L"\
 .syTot, "                                                            /* Lower left OneDrive subscription banner */ L"\
 [id='34318026-c018-414b-abb3-3e32dfb9cc4c'], "                       /* Word button in sidebar */ L"\
 [id='c5251a9b-a95d-4595-91ee-a39e6eed3db2'], "                       /* Excel button in sidebar */ L"\
